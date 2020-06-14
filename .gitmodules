@@ -4,3 +4,6 @@
 [submodule "sources/tools/rkdeveloptool"]
 	path = sources/tools/rkdeveloptool
 	url = https://github.com/rockchip-linux/rkdeveloptool
+[submodule "sources/docker"]
+	path = sources/docker
+	url = https://github.com/amery/docker-builder
