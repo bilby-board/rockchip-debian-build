@@ -1,1 +1,6 @@
 FROM @@USER@@/docker-ubuntu-builder:18.04
+
+# dependencies
+RUN apt-get update && apt-get install --no-install-recommends -y \
+	libusb-1.0-0-dev \
+	&& apt-get clean
