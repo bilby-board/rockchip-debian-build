@@ -1,3 +1,6 @@
 [submodule "sources/tools/rkflashtool"]
 	path = sources/tools/rkflashtool
 	url = https://github.com/neo-technologies/rkflashtool
+[submodule "sources/tools/rkdeveloptool"]
+	path = sources/tools/rkdeveloptool
+	url = https://github.com/rockchip-linux/rkdeveloptool
