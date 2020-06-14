@@ -1,0 +1,1 @@
+FROM @@USER@@/docker-ubuntu-builder:18.04
