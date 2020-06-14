@@ -1,0 +1,3 @@
+[submodule "sources/tools/rkflashtool"]
+	path = sources/tools/rkflashtool
+	url = https://github.com/neo-technologies/rkflashtool
