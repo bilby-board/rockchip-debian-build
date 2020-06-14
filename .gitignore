@@ -1,2 +1,3 @@
 /.docker-run-cache
+/build
 /out
