@@ -27,6 +27,11 @@ sudo make clean
 
 ## cross-arch execution (chroot into rootfs)
 
+We need `binfmt_misc` setup to use an emulator when working
+with the target's root filesystem, and as this is kernel setup
+we need it in the build server regardless if we use a docker-based
+sandbox or not.
+
 ```
 sudo apt-get install binfmt-support qemu-user-static
 ```
