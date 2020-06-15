@@ -7,6 +7,6 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 
 # debootstrap
 RUN apt-get update && apt-get install --no-install-recommends -y \
-	qemu binfmt-support qemu-user-static \
+	binfmt-support qemu-user-static \
 	debootstrap debian-archive-keyring \
 	&& apt-get clean
