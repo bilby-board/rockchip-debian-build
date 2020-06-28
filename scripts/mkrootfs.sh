@@ -46,7 +46,7 @@ mkrootfs_debootstrap() {
 # arguments are rootfs directories
 #
 for d; do
-	[ -d "$d" ] || mkdir "$d"
+	[ -d "$d" ] || mkdir -p "$d"
 
 	ROOTFS_ID="$(cd "$d" && echo "${PWD##*/}")"
 	[ -n "$ROOTFS_ID" ] || die "$d: Invalid directory"
