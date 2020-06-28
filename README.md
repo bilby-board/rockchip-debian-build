@@ -11,7 +11,7 @@ finding the right `$WS/run.sh` for us.
 ln -s $PWD/sources/docker/bin/x ~/bin/
 
 x make
-x -r ./mkrootfs.sh
+x -r make rootfs
 x -r make clean
 ```
 
@@ -19,7 +19,7 @@ x -r make clean
 
 ```
 make
-sudo ./mkrootfs.sh
+sudo make rootfs
 sudo make clean
 ```
 
