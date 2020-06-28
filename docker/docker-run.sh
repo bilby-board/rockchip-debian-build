@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -eux
+set -eu
 
 # $WS/run.sh [-r] <cmd>
 #
@@ -30,4 +30,4 @@ if ! docker images | grep -q "$(echo "^$IMAGE:" | sed -e 's|:|[ \\t]\\+|g')"; th
 fi
 
 export DOCKER_DIR
-exec "$PD/run.sh" ${SUDO:+-r} "$DOCKER_DIR/run.sh" "$@"
+exec "$PD/run.sh" ${SUDO:+-r} "$WS/scripts/run.sh" "$@"
