@@ -13,6 +13,7 @@ ln -s $PWD/sources/docker/bin/x ~/bin/
 x make
 x -r make rootfs
 x -r make clean
+cd build/...; x -r uname -a; x -r apt-get install vim
 ```
 
 ## Usage without build container
@@ -21,6 +22,8 @@ x -r make clean
 make
 sudo make rootfs
 sudo make clean
+sudo ./scripts/chroot.sh build/... uname -a
+sudo ./scripts/chroot.sh build/... apt-get install vim
 ```
 
 # Dependencies
