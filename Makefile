@@ -4,22 +4,34 @@ B=$(CURDIR)/build
 ROOTFS_DIR=$(B)/rootfs
 SCRIPTS_DIR=$(CURDIR)/scripts
 
+.PHONY: all
+
+# tools
+#
 RKFLASHTOOL_SRCDIR=$(CURDIR)/sources/tools/rkflashtool
 RKDEVELOPTOOL_SRCDIR=$(CURDIR)/sources/tools/rkdeveloptool
 
 RKDEVELOPTOOL_BUILDDIR=$(B)/rkdeveloptool
 
+TOOLS=rkflashtool rkdeveloptool
+
+# boards
+#
 ROOTFS_FIREFLY_RK3399_SID=$(ROOTFS_DIR)/firefly-rk3399-sid
 
-.PHONY: all clean build install rootfs
+# entrypoints
+#
+.PHONY: all clean tools build install rootfs
 
-all: build install
+all: tools
 clean:
 	$(MAKE) -C $(RKFLASHTOOL_SRCDIR) clean
 	rm -rf $(O) $(B)
 
-build: build-rkflashtool build-rkdeveloptool rootfs
-install: install-rkflashtool install-rkdeveloptool
+tools: $(patsubst %, $(O)/bin/%, $(TOOLS))
+
+build: rootfs
+install:
 
 # rootfs
 #
@@ -38,9 +50,7 @@ $(ROOTFS_FIREFLY_RK3399_SID)/bin/sh: BOARD=firefly SOC=rk3399
 
 # mkflashtool
 #
-build-rkflashtool:
-	@$(MAKE) -C $(RKFLASHTOOL_SRCDIR) PREFIX= all
-install-rkflashtool: $(O)
+$(O)/bin/rkflashtool: $(O)
 	@$(MAKE) -C $(RKFLASHTOOL_SRCDIR) PREFIX= DESTDIR=$(O) all install
 
 # mkdeveloptool
@@ -52,11 +62,10 @@ $(RKDEVELOPTOOL_BUILDDIR)/Makefile: $(RKDEVELOPTOOL_SRCDIR)/configure
 	mkdir -p $(@D)
 	cd $(@D); $^ --prefix=
 
-build-rkdeveloptool: $(RKDEVELOPTOOL_BUILDDIR)/Makefile
-	$(MAKE) -C $(^D)
+$(O)/bin/rkdeveloptool: $(RKDEVELOPTOOL_BUILDDIR)/Makefile $(O)
+	@$(MAKE) -C $(^D) DESTDIR=$(O) install
 
-install-rkdeveloptool: $(RKDEVELOPTOOL_BUILDDIR)/Makefile $(O)
-	$(MAKE) -C $(^D) DESTDIR=$(O) install
-
+# misc
+#
 $(O):
 	mkdir -p $@
