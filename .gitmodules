@@ -10,3 +10,6 @@
 [submodule "sources/u-boot/u-boot-rockchip"]
 	path = sources/u-boot/u-boot-rockchip
 	url = ../../bilby-board/u-boot
+[submodule "sources/linux/linux-rockchip"]
+	path = sources/linux/linux-rockchip
+	url = ../../bilby-board/linux
