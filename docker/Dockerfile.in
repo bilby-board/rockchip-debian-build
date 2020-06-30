@@ -1,6 +1,6 @@
 FROM @@USER@@/docker-ubuntu-builder:18.04
 
-# dependencies
+# rockchip tools
 RUN apt-get update && apt-get install --no-install-recommends -y \
 	libusb-1.0-0-dev \
 	&& apt-get clean
@@ -9,4 +9,15 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 RUN apt-get update && apt-get install --no-install-recommends -y \
 	binfmt-support qemu-user-static \
 	debootstrap debian-archive-keyring \
+	&& apt-get clean
+
+# cross compile linux
+RUN apt-get update && apt-get install --no-install-recommends -y \
+	gcc-aarch64-linux-gnu \
+	gcc-multilib-arm-linux-gnueabi \
+	gcc-multilib-arm-linux-gnueabihf \
+	bc \
+	bison \
+	flex \
+	libssl-dev \
 	&& apt-get clean
