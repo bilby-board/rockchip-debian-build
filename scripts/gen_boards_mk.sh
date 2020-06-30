@@ -122,6 +122,9 @@ kernel-$id: \$($BUILDDIR)/$image_file
 
 \$($BUILDDIR)/$image_file: \$($BUILDDIR)/.config
 	\$(MAKE) \$($MAKEARGS)${image_target:+ $image_target}
+
+kernel-$id-cmd: \$($BUILDDIR)/.config
+	\$(MAKE) \$($MAKEARGS) \$(CMD)
 EOT
 
 	BOARDS_KERNEL="${BOARDS_KERNEL:+$BOARDS_KERNEL }kernel-$id"
