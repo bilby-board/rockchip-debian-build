@@ -73,7 +73,9 @@ gen_board_variant() {
 	.PHONY: rootfs-$r
 	rootfs-$r: \$(ROOTFS_$R)/bin/sh
 
-	\$(ROOTFS_$R)/bin/sh: BOARD=${BOARD:-$id} SOC=$soc ARCH=$arch
+	\$(ROOTFS_$R)/bin/sh: BOARD=${BOARD:-$id}
+	\$(ROOTFS_$R)/bin/sh: SOC=$soc
+	\$(ROOTFS_$R)/bin/sh: ARCH=$arch
 
 	EOT
 
