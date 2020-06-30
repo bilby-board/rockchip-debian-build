@@ -49,9 +49,12 @@ guess_arch() {
 	case "$2" in
 	*armhf*) echo "armhf" ;;
 	*armel*) echo "armel" ;;
+	*arm64*) echo "arm64" ;;
 	*)
 		case "$1" in
-		rk3399|rk3288)
+		rk3399)
+			echo "arm64" ;;
+		rk3288)
 			echo "armhf" ;;
 		esac
 		;;
