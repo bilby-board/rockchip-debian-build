@@ -120,13 +120,17 @@ $MAKEARGS = $make_args
 \$($BUILDDIR)/$image_file: \$($BUILDDIR)/.config
 	\$(MAKE) \$($MAKEARGS)${image_target:+ $image_target}
 
-.PHONY: kernel-$id kernel-$id-cmd
+.PHONY: kernel-$id kernel-$id-cmd kernel-$id-savedefconfig
 
 kernel-$id: \$($BUILDDIR)/$image_file
 
 kernel-$id-cmd: \$($BUILDDIR)/.config
 	\$(MAKE) \$($MAKEARGS) \$(CMD)
 
+kernel-$id-savedefconfig: \$($BUILDDIR)/.config
+	\$(MAKE) \$($MAKEARGS) savedefconfig
+	mkdir -p \$(BOARDS_CONFIG_DIR)/$id
+	mv \$($BUILDDIR)/defconfig \$(BOARDS_CONFIG_DIR)/$id/defconfig
 EOT
 
 	BOARDS_KERNEL="${BOARDS_KERNEL:+$BOARDS_KERNEL }kernel-$id"
