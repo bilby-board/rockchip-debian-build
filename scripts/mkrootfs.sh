@@ -66,7 +66,7 @@ for d; do
 			soc=rk3288
 			;;
 		*)
-			soc=
+			soc=unknown
 			;;
 		esac
 		;;
@@ -77,16 +77,27 @@ for d; do
 
 	# ARCH
 	case "${ARCH:-}" in
-	armel|armhf)
+	armel|armhf|arm64)
 		arch=$ARCH
 		;;
 	"")
 		case "$ROOTFS_ID" in
+		*arm64*)
+			arch=arm64
+			;;
 		*armel*)
 			arch=armel
 			;;
 		*)
-			arch=armhf
+			case "$soc" in
+			rk3399)
+				arch=arm64
+				;;
+			rk3288)
+				arch=armhf
+				;;
+			esac
+			;;
 		esac
 		;;
 	*)
@@ -97,7 +108,11 @@ for d; do
 	# QEMU
 	case "$arch" in
 	armel|armhf)
-		qemu=/usr/bin/qemu-arm-static ;;
+		qemu=/usr/bin/qemu-arm-static
+		;;
+	arm64)
+		qemu=/usr/bin/qemu-aarch64-static
+		;;
 	*)
 		qemu=
 		;;
@@ -106,7 +121,8 @@ for d; do
 	# DISTRO
 	#
 	case "${DISTRO_VERSION:-}" in
-	sid)	distro=debian
+	sid)
+		distro=debian
 		distro_version=sid
 		;;
 	"")
