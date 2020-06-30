@@ -121,6 +121,7 @@ $MAKEARGS = $make_args
 	\$(MAKE) \$($MAKEARGS)${image_target:+ $image_target}
 
 .PHONY: kernel-$id kernel-$id-cmd kernel-$id-savedefconfig
+.PHONY: kernel-$id-menucconfig
 
 kernel-$id: \$($BUILDDIR)/$image_file
 
@@ -131,6 +132,9 @@ kernel-$id-savedefconfig: \$($BUILDDIR)/.config
 	\$(MAKE) \$($MAKEARGS) savedefconfig
 	mkdir -p \$(BOARDS_CONFIG_DIR)/$id
 	mv \$($BUILDDIR)/defconfig \$(BOARDS_CONFIG_DIR)/$id/defconfig
+
+kernel-$id-menuconfig: \$($BUILDDIR)/.config
+	\$(MAKE) \$($MAKEARGS) menuconfig
 EOT
 
 	BOARDS_KERNEL="${BOARDS_KERNEL:+$BOARDS_KERNEL }kernel-$id"
