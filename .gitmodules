@@ -7,3 +7,6 @@
 [submodule "sources/docker"]
 	path = sources/docker
 	url = https://github.com/amery/docker-builder
+[submodule "sources/u-boot/u-boot-rockchip"]
+	path = sources/u-boot/u-boot-rockchip
+	url = ../../bilby-board/u-boot
