@@ -46,7 +46,7 @@ guess_soc() {
 }
 
 guess_arch() {
-	case "$2" in
+	case "${2:-}" in
 	*armhf*) echo "armhf" ;;
 	*armel*) echo "armel" ;;
 	*arm64*) echo "arm64" ;;
@@ -61,6 +61,72 @@ guess_arch() {
 	esac
 }
 
+gen_board_kernel() {
+	local soc= arch=
+	local builddir= BUILDDIR= MAKEARGS=
+	local defconfig=defconfig
+	local image_file= image_target=
+	local make_args=
+	local cross_compile= cross32_compile=
+
+	soc=${SOC:-$(guess_soc $id)}
+	arch=${ARCH:-$(guess_arch $soc)}
+
+	builddir="\$(B)/linux/$id"
+	BUILDDIR="KERNEL_${ID}_BUILDDIR"
+	MAKEARGS="KERNEL_${ID}_MAKE_ARGS"
+
+	case "$arch" in
+	arm64)
+		cross_compile=aarch64-linux-gnu-
+		cross32_compile=arm-linux-gnueabihf-
+		;;
+	armhf)
+		cross_compile=arm-linux-gnueabihf-
+		arch=arm
+		;;
+	armel)
+		cross_compile=arm-linux-gnueabi-
+		arch=arm
+		;;
+	esac
+
+	case "$arch" in
+	arm64)
+		image_file=arch/$arch/boot/Image.gz
+		;;
+	arm)
+		image_file=arch/$arch/boot/zImage
+		;;
+	esac
+
+	make_args="-C \$(LINUX_SRCDIR) O=\$($BUILDDIR)"
+	make_args="$make_args ARCH=$arch${cross_compile:+ CROSS_COMPILE=$cross_compile}${cross32_compile:+ CROSS32_COMPILE=$cross32_compile}"
+
+	cat <<EOT
+$BUILDDIR = $builddir
+$MAKEARGS = $make_args
+
+.PHONY: kernel-$id
+kernel-$id: \$($BUILDDIR)/$image_file
+
+\$($BUILDDIR)/.config: \$(LINUX_SRCDIR)/Makefile
+\$($BUILDDIR)/.config: \$(SCRIPTS_DIR)/gen_boards_mk.sh
+\$($BUILDDIR)/.config:
+	if [ -s \$@ ]; then \\
+		\$(MAKE) \$($MAKEARGS) oldconfig; \\
+	else \\
+		mkdir -p \$(@D); \\
+		\$(MAKE) \$($MAKEARGS) $defconfig; \\
+	fi
+
+\$($BUILDDIR)/$image_file: \$($BUILDDIR)/.config
+	\$(MAKE) \$($MAKEARGS)${image_target:+ $image_target}
+EOT
+
+	BOARDS_KERNEL="${BOARDS_KERNEL:+$BOARDS_KERNEL }kernel-$id"
+}
+
 gen_board_variant() {
 	local VARIANT="$(varify "${1:-}")" variant="${1:-}"
 	local r=$id${variant:+-$variant}
@@ -71,7 +137,7 @@ gen_board_variant() {
 	arch=${ARCH:-$(guess_arch $soc $r)}
 
 	cat <<-EOT
-	ROOTFS_$R=\$(ROOTFS_DIR)/$r
+	ROOTFS_$R = \$(ROOTFS_DIR)/$r
 
 	.PHONY: rootfs-$r
 	rootfs-$r: \$(ROOTFS_$R)/bin/sh
@@ -83,10 +149,10 @@ gen_board_variant() {
 	EOT
 
 	BOARDS_ROOTFS="${BOARDS_ROOTFS:+$BOARDS_ROOTFS }rootfs-$r"
-
 }
 
 BOARDS_ROOTFS=
+BOARDS_KERNEL=
 
 for id in $BOARDS; do
 	cat <<-EOT
@@ -105,6 +171,8 @@ for id in $BOARDS; do
 
 	[ -n "$ID" ] || ID=$(varify "$id")
 
+	gen_board_kernel
+
 	if [ -n "$VARIANTS" ]; then
 		for v in $VARIANTS; do
 			gen_board_variant "$v"
@@ -122,3 +190,4 @@ set_list BOARDS_CONFIG_DIR $config_dir
 set_list BOARDS_CONFIG $(board_config_fullname '$(BOARDS_CONFIG_DIR)' $BOARDS)
 set_list BOARDS $BOARDS
 set_list BOARDS_ROOTFS $BOARDS_ROOTFS
+set_list BOARDS_KERNEL $BOARDS_KERNEL

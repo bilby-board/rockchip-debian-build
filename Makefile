@@ -5,6 +5,8 @@ ROOTFS_DIR=$(B)/rootfs
 SCRIPTS_DIR=$(CURDIR)/scripts
 BOARDS_CONFIG_DIR=$(CURDIR)/conf
 
+LINUX_SRCDIR=$(CURDIR)/sources/linux/linux-rockchip
+
 .PHONY: all
 
 # tools
@@ -18,21 +20,25 @@ TOOLS=rkflashtool rkdeveloptool
 
 # entrypoints
 #
-.PHONY: all clean tools build install rootfs
+.PHONY: all clean tools build install rootfs kernel
 
-all: tools
+all: tools kernel
 clean:
 	$(MAKE) -C $(RKFLASHTOOL_SRCDIR) clean
 	rm -rf $(O) $(B)
 
 tools: $(patsubst %, $(O)/bin/%, $(TOOLS))
 
-build: rootfs
+build: tools kernel rootfs
 install:
 
 # boards
 #
 -include $(B)/boards.mk
+
+# linux
+#
+kernel: $(BOARDS_KERNEL)
 
 # rootfs
 #
