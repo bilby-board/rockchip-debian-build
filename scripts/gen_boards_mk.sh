@@ -107,9 +107,6 @@ gen_board_kernel() {
 $BUILDDIR = $builddir
 $MAKEARGS = $make_args
 
-.PHONY: kernel-$id
-kernel-$id: \$($BUILDDIR)/$image_file
-
 \$($BUILDDIR)/.config: \$(LINUX_SRCDIR)/Makefile
 \$($BUILDDIR)/.config: \$(SCRIPTS_DIR)/gen_boards_mk.sh
 \$($BUILDDIR)/.config:
@@ -123,8 +120,13 @@ kernel-$id: \$($BUILDDIR)/$image_file
 \$($BUILDDIR)/$image_file: \$($BUILDDIR)/.config
 	\$(MAKE) \$($MAKEARGS)${image_target:+ $image_target}
 
+.PHONY: kernel-$id kernel-$id-cmd
+
+kernel-$id: \$($BUILDDIR)/$image_file
+
 kernel-$id-cmd: \$($BUILDDIR)/.config
 	\$(MAKE) \$($MAKEARGS) \$(CMD)
+
 EOT
 
 	BOARDS_KERNEL="${BOARDS_KERNEL:+$BOARDS_KERNEL }kernel-$id"
