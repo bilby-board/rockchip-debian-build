@@ -172,11 +172,13 @@ for id in $BOARDS; do
 	EOT
 
 	# reset
-	ID= BOARD=
-	SOC= ARCH=
+	ID= ARCH=
 	DISTRO= DISTRO_VERSION=
 	VARIANTS= ROOTFS=
 	LINUX_DEFCONFIG=
+
+	SOC=$(guess_soc "$id")
+	BOARD="$id"
 
 	# load
 	. "$config_dir/$id.conf"
