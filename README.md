@@ -10,7 +10,7 @@ finding the right `$WS/run.sh` for us.
 ```
 ln -s $PWD/sources/docker/bin/x ~/bin/
 
-x make
+x make -j16
 x -r make rootfs
 x -r make clean
 cd build/...; x -r uname -a; x -r apt-get install vim
@@ -19,7 +19,7 @@ cd build/...; x -r uname -a; x -r apt-get install vim
 ## Usage without build container
 
 ```
-make
+make -j16
 sudo make rootfs
 sudo make clean
 sudo ./scripts/chroot.sh build/... uname -a
