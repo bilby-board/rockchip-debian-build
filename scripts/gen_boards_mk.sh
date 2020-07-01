@@ -64,7 +64,7 @@ guess_arch() {
 gen_board_kernel() {
 	local soc= arch=
 	local builddir= BUILDDIR= MAKEARGS=
-	local image_file= image_target=
+	local image_file=
 	local make_args=
 	local cross_compile= cross32_compile=
 
@@ -90,14 +90,7 @@ gen_board_kernel() {
 		;;
 	esac
 
-	case "$arch" in
-	arm64)
-		image_file=arch/$arch/boot/Image.gz
-		;;
-	arm)
-		image_file=arch/$arch/boot/zImage
-		;;
-	esac
+	image_file=arch/$arch/boot/Image
 
 	make_args="-C \$(LINUX_SRCDIR) O=\$($BUILDDIR)"
 	make_args="$make_args ARCH=$arch${cross_compile:+ CROSS_COMPILE=$cross_compile}${cross32_compile:+ CROSS32_COMPILE=$cross32_compile}"
@@ -122,7 +115,7 @@ $MAKEARGS = $make_args
 	fi
 
 \$($BUILDDIR)/$image_file: \$($BUILDDIR)/.config
-	\$(MAKE) \$($MAKEARGS)${image_target:+ $image_target}
+	\$(MAKE) \$($MAKEARGS)
 
 .PHONY: kernel-$id kernel-$id-cmd kernel-$id-savedefconfig
 .PHONY: kernel-$id-menucconfig
