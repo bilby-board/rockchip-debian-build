@@ -64,7 +64,6 @@ guess_arch() {
 gen_board_kernel() {
 	local soc= arch=
 	local builddir= BUILDDIR= MAKEARGS=
-	local defconfig=defconfig
 	local image_file= image_target=
 	local make_args=
 	local cross_compile= cross32_compile=
@@ -110,11 +109,16 @@ $MAKEARGS = $make_args
 \$($BUILDDIR)/.config: \$(LINUX_SRCDIR)/Makefile
 \$($BUILDDIR)/.config: \$(SCRIPTS_DIR)/gen_boards_mk.sh
 \$($BUILDDIR)/.config:
+	@mkdir -p \$(@D)
 	if [ -s \$@ ]; then \\
 		\$(MAKE) \$($MAKEARGS) oldconfig; \\
-	else \\
-		mkdir -p \$(@D); \\
-		\$(MAKE) \$($MAKEARGS) $defconfig; \\
+	elif [ -s \$(BOARDS_CONFIG_DIR)/$id/defconfig ]; then \\
+		cp \$(BOARDS_CONFIG_DIR)/$id/defconfig $@; \\
+		\$(MAKE) \$($MAKEARGS) oldconfig; \\
+	${LINUX_DEFCONFIG:+elif [ -s \$(LINUX_SRCDIR)/arch/$arch/configs/${LINUX_DEFCONFIG}_defconfig ]; then \\
+		\$(MAKE) \$($MAKEARGS) ${LINUX_DEFCONFIG}_defconfig; \\
+	}else \\
+		\$(MAKE) \$($MAKEARGS) defconfig; \\
 	fi
 
 \$($BUILDDIR)/$image_file: \$($BUILDDIR)/.config
@@ -129,8 +133,9 @@ kernel-$id-cmd: \$($BUILDDIR)/.config
 	\$(MAKE) \$($MAKEARGS) \$(CMD)
 
 kernel-$id-savedefconfig: \$($BUILDDIR)/.config
-	\$(MAKE) \$($MAKEARGS) savedefconfig
-	mkdir -p \$(BOARDS_CONFIG_DIR)/$id
+	\$(MAKE) \$($MAKEARGS) savedefconfig${LINUX_DEFCONFIG:+
+	cp \$($BUILDDIR)/defconfig \$(LINUX_SRCDIR)/arch/$arch/configs/${LINUX_DEFCONFIG}_defconfig}
+	@mkdir -p \$(BOARDS_CONFIG_DIR)/$id
 	mv \$($BUILDDIR)/defconfig \$(BOARDS_CONFIG_DIR)/$id/defconfig
 
 kernel-$id-menuconfig: \$($BUILDDIR)/.config
@@ -178,6 +183,7 @@ for id in $BOARDS; do
 	SOC= ARCH=
 	DISTRO= DISTRO_VERSION=
 	VARIANTS= ROOTFS=
+	LINUX_DEFCONFIG=
 
 	# load
 	. "$config_dir/$id.conf"
