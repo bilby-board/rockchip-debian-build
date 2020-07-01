@@ -26,6 +26,28 @@ sudo ./scripts/chroot.sh build/... uname -a
 sudo ./scripts/chroot.sh build/... apt-get install vim
 ```
 
+## Linux kernel
+
+to build all kernels you just need to run `make kernel`, parallel builds are recommended.
+`root` is not required nor recommended, and `kernel` is part of the _default_ `all` rule.
+
+```
+x make -j16 kernel
+```
+
+but you can also work with the kernel of a particular `BOARD`.
+
+```
+# compile, `make Image dts modules`
+x make -j16 kernel-BOARD
+# adjust configuration , `make menuconfig`
+x make kernel-BOARD-menuconfig
+# backup current .config as defconfig `make savedefconfig`
+x make kernel-BOARD-savedefconfig
+# shortcut for a custom command like `make clean`
+x make -j16 kernel-BOARD-cmd CMD=clean
+```
+
 # Dependencies
 
 ## cross-arch execution (chroot into rootfs)
