@@ -65,7 +65,6 @@ gen_board_kernel() {
 	local soc= arch=
 	local builddir= BUILDDIR= MAKEARGS=
 	local image_file=
-	local make_args=
 	local cross_compile= cross32_compile=
 
 	soc=${SOC:-$(guess_soc $id)}
@@ -92,12 +91,9 @@ gen_board_kernel() {
 
 	image_file=arch/$arch/boot/Image
 
-	make_args="-C \$(LINUX_SRCDIR) O=\$($BUILDDIR)"
-	make_args="$make_args ARCH=$arch${cross_compile:+ CROSS_COMPILE=$cross_compile}${cross32_compile:+ CROSS32_COMPILE=$cross32_compile}"
-
 	cat <<EOT
 $BUILDDIR = $builddir
-$MAKEARGS = $make_args
+$MAKEARGS = -C \$(LINUX_SRCDIR) O=\$($BUILDDIR) ARCH=$arch${cross_compile:+ CROSS_COMPILE=$cross_compile}${cross32_compile:+ CROSS32_COMPILE=$cross32_compile}
 
 \$($BUILDDIR)/.config: \$(LINUX_SRCDIR)/Makefile
 \$($BUILDDIR)/.config: \$(SCRIPTS_DIR)/gen_boards_mk.sh
@@ -106,8 +102,8 @@ $MAKEARGS = $make_args
 	if [ -s \$@ ]; then \\
 		\$(MAKE) \$($MAKEARGS) oldconfig; \\
 	elif [ -s \$(BOARDS_CONFIG_DIR)/$id/defconfig ]; then \\
-		cp \$(BOARDS_CONFIG_DIR)/$id/defconfig $@; \\
-		\$(MAKE) \$($MAKEARGS) oldconfig; \\
+		cp \$(BOARDS_CONFIG_DIR)/$id/defconfig \$@; \\
+		\$(MAKE) \$($MAKEARGS) olddefconfig; \\
 	${LINUX_CONFIG:+elif [ -s \$(LINUX_SRCDIR)/arch/$arch/configs/${LINUX_CONFIG}_defconfig ]; then \\
 		\$(MAKE) \$($MAKEARGS) ${LINUX_CONFIG}_defconfig; \\
 	}else \\
