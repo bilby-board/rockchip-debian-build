@@ -108,8 +108,8 @@ $MAKEARGS = $make_args
 	elif [ -s \$(BOARDS_CONFIG_DIR)/$id/defconfig ]; then \\
 		cp \$(BOARDS_CONFIG_DIR)/$id/defconfig $@; \\
 		\$(MAKE) \$($MAKEARGS) oldconfig; \\
-	${LINUX_DEFCONFIG:+elif [ -s \$(LINUX_SRCDIR)/arch/$arch/configs/${LINUX_DEFCONFIG}_defconfig ]; then \\
-		\$(MAKE) \$($MAKEARGS) ${LINUX_DEFCONFIG}_defconfig; \\
+	${LINUX_CONFIG:+elif [ -s \$(LINUX_SRCDIR)/arch/$arch/configs/${LINUX_CONFIG}_defconfig ]; then \\
+		\$(MAKE) \$($MAKEARGS) ${LINUX_CONFIG}_defconfig; \\
 	}else \\
 		\$(MAKE) \$($MAKEARGS) defconfig; \\
 	fi
@@ -126,8 +126,8 @@ kernel-$id-cmd: \$($BUILDDIR)/.config
 	\$(MAKE) \$($MAKEARGS) \$(CMD)
 
 kernel-$id-savedefconfig: \$($BUILDDIR)/.config
-	\$(MAKE) \$($MAKEARGS) savedefconfig${LINUX_DEFCONFIG:+
-	cp \$($BUILDDIR)/defconfig \$(LINUX_SRCDIR)/arch/$arch/configs/${LINUX_DEFCONFIG}_defconfig}
+	\$(MAKE) \$($MAKEARGS) savedefconfig${LINUX_CONFIG:+
+	cp \$($BUILDDIR)/defconfig \$(LINUX_SRCDIR)/arch/$arch/configs/${LINUX_CONFIG}_defconfig}
 	@mkdir -p \$(BOARDS_CONFIG_DIR)/$id
 	mv \$($BUILDDIR)/defconfig \$(BOARDS_CONFIG_DIR)/$id/defconfig
 
@@ -162,8 +162,12 @@ gen_board_variant() {
 	BOARDS_ROOTFS="${BOARDS_ROOTFS:+$BOARDS_ROOTFS }rootfs-$r"
 }
 
+# global lists
 BOARDS_ROOTFS=
 BOARDS_KERNEL=
+
+# backward compatibility
+LINUX_DEFCONFIG=
 
 for id in $BOARDS; do
 	cat <<-EOT
@@ -175,7 +179,7 @@ for id in $BOARDS; do
 	ID= ARCH=
 	DISTRO= DISTRO_VERSION=
 	VARIANTS= ROOTFS=
-	LINUX_DEFCONFIG=
+	LINUX_CONFIG=
 
 	SOC=$(guess_soc "$id")
 	BOARD="$id"
@@ -183,7 +187,9 @@ for id in $BOARDS; do
 	# load
 	. "$config_dir/$id.conf"
 
-	[ -n "$ID" ] || ID=$(varify "$id")
+	: ${ID:=$(varify "$id")}
+	# backward compatibility
+	: ${LINUX_CONFIG:=${LINUX_DEFCONFIG:-}}
 
 	gen_board_kernel
 
