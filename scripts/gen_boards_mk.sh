@@ -180,10 +180,19 @@ $MAKEARGS = -C \$(UBOOT_SRCDIR) O=\$($BUILDDIR) ARCH=$arch${cross_compile:+ CROS
 		\$(MAKE) \$($MAKEARGS) defconfig; \\
 	fi
 
-.PHONY: uboot-$id
+.PHONY: uboot-$id uboot-$id-savedefconfig uboot-$id-menuconfig
 
 uboot-$id: \$($BUILDDIR)/.config
 	\$(MAKE) \$($MAKEARGS)
+
+uboot-$id-savedefconfig: \$($BUILDDIR)/.config
+	\$(MAKE) \$($MAKEARGS) savedefconfig
+	cp \$($BUILDDIR)/defconfig \$(UBOOT_SRCDIR)/configs/${UBOOT_CONFIG}_defconfig}
+	@mkdir -p \$(BOARDS_CONFIG_DIR)/$id
+	mv \$($BUILDDIR)/defconfig \$(BOARDS_CONFIG_DIR)/$id/uboot.defconfig
+
+uboot-$id-menuconfig: \$($BUILDDIR)/.config
+	\$(MAKE) \$($MAKEARGS) menuconfig
 
 EOT
 
