@@ -187,7 +187,7 @@ uboot-$id: \$($BUILDDIR)/.config
 
 uboot-$id-savedefconfig: \$($BUILDDIR)/.config
 	\$(MAKE) \$($MAKEARGS) savedefconfig
-	cp \$($BUILDDIR)/defconfig \$(UBOOT_SRCDIR)/configs/${UBOOT_CONFIG}_defconfig}
+	cp \$($BUILDDIR)/defconfig \$(UBOOT_SRCDIR)/configs/${UBOOT_CONFIG}_defconfig
 	@mkdir -p \$(BOARDS_CONFIG_DIR)/$id
 	mv \$($BUILDDIR)/defconfig \$(BOARDS_CONFIG_DIR)/$id/uboot.defconfig
 
