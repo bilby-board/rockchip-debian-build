@@ -6,6 +6,7 @@ SCRIPTS_DIR=$(CURDIR)/scripts
 BOARDS_CONFIG_DIR=$(CURDIR)/conf
 
 LINUX_SRCDIR=$(CURDIR)/sources/linux/linux-rockchip
+UBOOT_SRCDIR=$(CURDIR)/sources/u-boot/u-boot-rockchip
 
 .PHONY: all
 
@@ -20,9 +21,9 @@ TOOLS=rkflashtool rkdeveloptool
 
 # entrypoints
 #
-.PHONY: all clean tools build install rootfs kernel
+.PHONY: all clean tools build install rootfs kernel uboot
 
-all: tools kernel
+all: tools kernel uboot
 clean:
 	$(MAKE) -C $(RKFLASHTOOL_SRCDIR) clean
 	rm -rf $(O) $(B)
@@ -39,6 +40,7 @@ install:
 # linux
 #
 kernel: $(BOARDS_KERNEL)
+uboot: $(BOARDS_UBOOT)
 
 # rootfs
 #

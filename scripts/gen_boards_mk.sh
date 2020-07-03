@@ -134,6 +134,62 @@ EOT
 	BOARDS_KERNEL="${BOARDS_KERNEL:+$BOARDS_KERNEL }kernel-$id"
 }
 
+gen_board_uboot() {
+	local soc= arch=
+	local builddir= BUILDDIR= MAKEARGS=
+	local cross_compile=
+
+	soc=${SOC:-$(guess_soc $id)}
+	arch=${ARCH:-$(guess_arch $soc)}
+
+	builddir="\$(B)/u-boot/$id"
+	BUILDDIR="UBOOT_${ID}_BUILDDIR"
+	MAKEARGS="UBOOT_${ID}_MAKEARGS"
+
+	case "$arch" in
+	arm64)
+		cross_compile=aarch64-linux-gnu-
+		arch=arm
+		;;
+	armhf)
+		cross_compile=arm-linux-gnueabihf-
+		arch=arm
+		;;
+	armel)
+		cross_compile=arm-linux-gnueabi-
+		arch=arm
+		;;
+	esac
+
+	cat <<EOT
+$BUILDDIR = $builddir
+$MAKEARGS = -C \$(UBOOT_SRCDIR) O=\$($BUILDDIR) ARCH=$arch${cross_compile:+ CROSS_COMPILE=$cross_compile}
+
+\$($BUILDDIR)/.config: \$(UBOOT_SRCDIR)/Makefile
+\$($BUILDDIR)/.config: \$(SCRIPTS_DIR)/gen_boards_mk.sh
+\$($BUILDDIR)/.config:
+	@mkdir -p \$(@D)
+	if [ -s \$@ ]; then \\
+		\$(MAKE) \$($MAKEARGS) oldconfig; \\
+	elif [ -s \$(BOARDS_CONFIG_DIR)/$id/uboot.defconfig ]; then \\
+		cp \$(BOARDS_CONFIG_DIR)/$id/uboot.defconfig \$@; \\
+		\$(MAKE) \$($MAKEARGS) olddefconfig; \\
+	elif [ -s \$(UBOOT_SRCDIR)/configs/${UBOOT_CONFIG}_defconfig ]; then \\
+		\$(MAKE) \$($MAKEARGS) ${UBOOT_CONFIG}_defconfig; \\
+	else \\
+		\$(MAKE) \$($MAKEARGS) defconfig; \\
+	fi
+
+.PHONY: uboot-$id
+
+uboot-$id: \$($BUILDDIR)/.config
+	\$(MAKE) \$($MAKEARGS)
+
+EOT
+
+	BOARDS_UBOOT="${BOARDS_UBOOT:+$BOARDS_UBOOT }uboot-$id"
+}
+
 gen_board_variant() {
 	local VARIANT="$(varify "${1:-}")" variant="${1:-}"
 	local r=$id${variant:+-$variant}
@@ -161,6 +217,7 @@ gen_board_variant() {
 # global lists
 BOARDS_ROOTFS=
 BOARDS_KERNEL=
+BOARDS_UBOOT=
 
 # backward compatibility
 LINUX_DEFCONFIG=
@@ -175,19 +232,22 @@ for id in $BOARDS; do
 	ID= ARCH=
 	DISTRO= DISTRO_VERSION=
 	VARIANTS= ROOTFS=
-	LINUX_CONFIG=
+	LINUX_CONFIG= UBOOT_CONFIG=
 
 	SOC=$(guess_soc "$id")
 	BOARD="$id"
+
 
 	# load
 	. "$config_dir/$id.conf"
 
 	: ${ID:=$(varify "$id")}
+	: ${UBOOT_CONFIG:=$id}
 	# backward compatibility
 	: ${LINUX_CONFIG:=${LINUX_DEFCONFIG:-}}
 
 	gen_board_kernel
+	gen_board_uboot
 
 	if [ -n "$VARIANTS" ]; then
 		for v in $VARIANTS; do
@@ -207,3 +267,4 @@ set_list BOARDS_CONFIG $(board_config_fullname '$(BOARDS_CONFIG_DIR)' $BOARDS)
 set_list BOARDS $BOARDS
 set_list BOARDS_ROOTFS $BOARDS_ROOTFS
 set_list BOARDS_KERNEL $BOARDS_KERNEL
+set_list BOARDS_UBOOT $BOARDS_UBOOT
