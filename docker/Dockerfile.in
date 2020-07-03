@@ -18,6 +18,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 	gcc-multilib-arm-linux-gnueabihf \
 	bc \
 	bison \
+	device-tree-compiler \
 	flex \
 	libncurses-dev \
 	libssl-dev \
