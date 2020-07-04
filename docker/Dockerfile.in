@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 	device-tree-compiler \
 	python3-dev \
 	swig \
+	u-boot-tools \
 	&& apt-get clean
 
 # cross compile linux and uboot

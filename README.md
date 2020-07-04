@@ -38,7 +38,7 @@ x make -j16 kernel
 but you can also work with the kernel of a particular `BOARD`.
 
 ```
-# compile, `make Image`
+# compile, `make uImage`
 x make -j16 kernel-BOARD
 # adjust configuration , `make menuconfig`
 x make kernel-BOARD-menuconfig

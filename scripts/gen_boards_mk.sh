@@ -61,11 +61,23 @@ guess_arch() {
 	esac
 }
 
+guess_loadaddr() {
+	case "${1:-}" in
+	rk3288|rk3399) echo 0x02000000 ;;
+	esac
+}
+
+guess_entrypoint() {
+	# use loadaddr
+	echo ""
+}
+
 gen_board_kernel() {
 	local soc= arch=
-	local builddir= BUILDDIR= MAKEARGS=
+	local builddir= BUILDDIR= MAKEARGS= LOADADDR= ENTRYPOINT=
 	local image_file=
 	local cross_compile= cross32_compile=
+	local uimage_loadaddre= uimage_entrypoint=
 
 	soc=${SOC:-$(guess_soc $id)}
 	arch=${ARCH:-$(guess_arch $soc)}
@@ -73,6 +85,8 @@ gen_board_kernel() {
 	builddir="\$(B)/linux/$id"
 	BUILDDIR="KERNEL_${ID}_BUILDDIR"
 	MAKEARGS="KERNEL_${ID}_MAKE_ARGS"
+	LOADADDR="UIMAGE_${ID}_LOADADDR"
+	ENTRYPOINT="UIMAGE_${ID}_ENTRYPOINT"
 
 	case "$arch" in
 	arm64)
@@ -90,12 +104,16 @@ gen_board_kernel() {
 	esac
 
 	image_file=arch/$arch/boot/Image
+	uimage_loadaddr=${UIMAGE_LOADADDR:-$(guess_loadaddr $soc)}
+	uimage_entrypoint=${UIMAGE_ENTRYPOINT:-$(guess_entrypoint $soc $uimage_loadaddr)}
 
 	cat <<EOT
 #
 # $id (linux)
 #
 $BUILDDIR = $builddir
+$LOADADDR = ${uimage_loadaddr:-}
+$ENTRYPOINT = ${uimage_entrypoint:-\$($LOADADDR)}
 
 $MAKEARGS = -C \$(LINUX_SRCDIR) O=\$($BUILDDIR) ARCH=$arch${cross_compile:+ CROSS_COMPILE=$cross_compile}${cross32_compile:+ CROSS32_COMPILE=$cross32_compile}
 
@@ -115,10 +133,13 @@ $MAKEARGS = -C \$(LINUX_SRCDIR) O=\$($BUILDDIR) ARCH=$arch${cross_compile:+ CROS
 \$($BUILDDIR)/$image_file: \$($BUILDDIR)/.config \$(GEN_BOARDS_MK_SH)
 	\$(MAKE) \$($MAKEARGS) \$(@F)
 
+\$($BUILDDIR)/uImage: \$($BUILDDIR)/$image_file \$(GEN_BOARDS_MK_SH)
+	\$(MKIMAGE) -A $arch -O linux -C \$(UIMAGE_COMP) -T kernel -a \$($LOADADDR) -e \$($ENTRYPOINT) -n $id -d \$< \$@
+
 .PHONY: kernel-$id kernel-$id-cmd kernel-$id-savedefconfig
 .PHONY: kernel-$id-menucconfig
 
-kernel-$id: \$($BUILDDIR)/$image_file
+kernel-$id: \$($BUILDDIR)/uImage
 
 kernel-$id-cmd: \$($BUILDDIR)/.config
 	\$(MAKE) \$($MAKEARGS) \$(CMD)
@@ -244,6 +265,7 @@ for id in $BOARDS; do
 	DISTRO= DISTRO_VERSION=
 	VARIANTS= ROOTFS=
 	LINUX_CONFIG= UBOOT_CONFIG=
+	UIMAGE_LOADADDR= UIMAGE_ENTRYPOINT=
 
 	SOC=$(guess_soc "$id")
 	BOARD="$id"

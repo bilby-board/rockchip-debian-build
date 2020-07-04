@@ -9,6 +9,9 @@ BOARDS_CONFIG_DIR=$(CURDIR)/conf
 LINUX_SRCDIR=$(S)/linux/linux-rockchip
 UBOOT_SRCDIR=$(S)/u-boot/u-boot-rockchip
 
+MKIMAGE = mkimage
+UIMAGE_COMP = gzip
+
 GEN_BOARDS_MK_SH = $(SCRIPTS_DIR)/gen_boards_mk.sh
 
 .PHONY: all
