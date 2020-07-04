@@ -1,19 +1,22 @@
 O=$(CURDIR)/out
 B=$(CURDIR)/build
+S=$(CURDIR)/sources
 
 ROOTFS_DIR=$(B)/rootfs
 SCRIPTS_DIR=$(CURDIR)/scripts
 BOARDS_CONFIG_DIR=$(CURDIR)/conf
 
-LINUX_SRCDIR=$(CURDIR)/sources/linux/linux-rockchip
-UBOOT_SRCDIR=$(CURDIR)/sources/u-boot/u-boot-rockchip
+LINUX_SRCDIR=$(S)/linux/linux-rockchip
+UBOOT_SRCDIR=$(S)/u-boot/u-boot-rockchip
+
+GEN_BOARDS_MK_SH = $(SCRIPTS_DIR)/gen_boards_mk.sh
 
 .PHONY: all
 
 # tools
 #
-RKFLASHTOOL_SRCDIR=$(CURDIR)/sources/tools/rkflashtool
-RKDEVELOPTOOL_SRCDIR=$(CURDIR)/sources/tools/rkdeveloptool
+RKFLASHTOOL_SRCDIR=$(S)/tools/rkflashtool
+RKDEVELOPTOOL_SRCDIR=$(S)/tools/rkdeveloptool
 
 RKDEVELOPTOOL_BUILDDIR=$(B)/rkdeveloptool
 
@@ -73,7 +76,7 @@ $(O)/bin/rkdeveloptool: $(RKDEVELOPTOOL_BUILDDIR)/Makefile $(O)
 $(O):
 	mkdir -p $@
 
-$(B)/boards.mk: $(SCRIPTS_DIR)/gen_boards_mk.sh $(BOARDS_CONFIG)
+$(B)/boards.mk: $(GEN_BOARDS_MK_SH) $(BOARDS_CONFIG)
 	@mkdir -p $(@D)
 	$< $(BOARDS_CONFIG_DIR) > $@~
 	mv $@~ $@

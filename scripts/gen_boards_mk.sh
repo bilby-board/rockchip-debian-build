@@ -92,12 +92,14 @@ gen_board_kernel() {
 	image_file=arch/$arch/boot/Image
 
 	cat <<EOT
+#
+# $id (linux)
+#
 $BUILDDIR = $builddir
+
 $MAKEARGS = -C \$(LINUX_SRCDIR) O=\$($BUILDDIR) ARCH=$arch${cross_compile:+ CROSS_COMPILE=$cross_compile}${cross32_compile:+ CROSS32_COMPILE=$cross32_compile}
 
-\$($BUILDDIR)/.config: \$(LINUX_SRCDIR)/Makefile
-\$($BUILDDIR)/.config: \$(SCRIPTS_DIR)/gen_boards_mk.sh
-\$($BUILDDIR)/.config:
+\$($BUILDDIR)/.config: \$(LINUX_SRCDIR)/Makefile \$(GEN_BOARDS_MK_SH)
 	@mkdir -p \$(@D)
 	if [ -s \$@ ]; then \\
 		\$(MAKE) \$($MAKEARGS) oldconfig; \\
@@ -110,8 +112,8 @@ $MAKEARGS = -C \$(LINUX_SRCDIR) O=\$($BUILDDIR) ARCH=$arch${cross_compile:+ CROS
 		\$(MAKE) \$($MAKEARGS) defconfig; \\
 	fi
 
-\$($BUILDDIR)/$image_file: \$($BUILDDIR)/.config
-	\$(MAKE) \$($MAKEARGS)
+\$($BUILDDIR)/$image_file: \$($BUILDDIR)/.config \$(GEN_BOARDS_MK_SH)
+	\$(MAKE) \$($MAKEARGS) \$(@F)
 
 .PHONY: kernel-$id kernel-$id-cmd kernel-$id-savedefconfig
 .PHONY: kernel-$id-menucconfig
@@ -129,6 +131,7 @@ kernel-$id-savedefconfig: \$($BUILDDIR)/.config
 
 kernel-$id-menuconfig: \$($BUILDDIR)/.config
 	\$(MAKE) \$($MAKEARGS) menuconfig
+
 EOT
 
 	BOARDS_KERNEL="${BOARDS_KERNEL:+$BOARDS_KERNEL }kernel-$id"
@@ -162,12 +165,13 @@ gen_board_uboot() {
 	esac
 
 	cat <<EOT
+#
+# $id (u-boot)
+#
 $BUILDDIR = $builddir
 $MAKEARGS = -C \$(UBOOT_SRCDIR) O=\$($BUILDDIR) ARCH=$arch${cross_compile:+ CROSS_COMPILE=$cross_compile}
 
-\$($BUILDDIR)/.config: \$(UBOOT_SRCDIR)/Makefile
-\$($BUILDDIR)/.config: \$(SCRIPTS_DIR)/gen_boards_mk.sh
-\$($BUILDDIR)/.config:
+\$($BUILDDIR)/.config: \$(UBOOT_SRCDIR)/Makefile \$(GEN_BOARDS_MK_SH)
 	@mkdir -p \$(@D)
 	if [ -s \$@ ]; then \\
 		\$(MAKE) \$($MAKEARGS) oldconfig; \\
@@ -209,6 +213,9 @@ gen_board_variant() {
 	arch=${ARCH:-$(guess_arch $soc $r)}
 
 	cat <<-EOT
+	#
+	# $id (rootfs)
+	#
 	ROOTFS_$R = \$(ROOTFS_DIR)/$r
 
 	.PHONY: rootfs-$r
@@ -232,11 +239,6 @@ BOARDS_UBOOT=
 LINUX_DEFCONFIG=
 
 for id in $BOARDS; do
-	cat <<-EOT
-	# $id
-	#
-	EOT
-
 	# reset
 	ID= ARCH=
 	DISTRO= DISTRO_VERSION=
