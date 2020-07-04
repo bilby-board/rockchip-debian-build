@@ -160,8 +160,10 @@ EOT
 
 gen_board_uboot() {
 	local soc= arch=
-	local builddir= BUILDDIR= MAKEARGS=
-	local cross_compile=
+	local builddir= BUILDDIR=
+	local makeargs= MAKEARGS=
+	local TFA= TFA_BUILDDIR=
+	local cross_compile= m0_cross_compile=
 
 	soc=${SOC:-$(guess_soc $id)}
 	arch=${ARCH:-$(guess_arch $soc)}
@@ -169,6 +171,7 @@ gen_board_uboot() {
 	builddir="\$(B)/u-boot/$id"
 	BUILDDIR="UBOOT_${ID}_BUILDDIR"
 	MAKEARGS="UBOOT_${ID}_MAKEARGS"
+	TFA_BUILDDIR="TFA_${ID}_BUILDDIR"
 
 	case "$arch" in
 	arm64)
@@ -185,13 +188,36 @@ gen_board_uboot() {
 		;;
 	esac
 
+	m0_cross_compile=arm-linux-gnueabi-
+
+	makeargs="ARCH=$arch${cross_compile:+ CROSS_COMPILE=$cross_compile}"
+
+	case "$soc" in
+	rk3399)
+		TFA="\$($TFA_BUILDDIR)/release/bl31/bl31.elf"
+		makeargs="$makeargs BL31=$TFA"
+		;;
+	esac
+
 	cat <<EOT
 #
 # $id (u-boot)
 #
 $BUILDDIR = $builddir
-$MAKEARGS = -C \$(UBOOT_SRCDIR) O=\$($BUILDDIR) ARCH=$arch${cross_compile:+ CROSS_COMPILE=$cross_compile}
+${TFA:+$TFA_BUILDDIR = \$(ARM_TRUSTED_FIRMWARE_SRCDIR)/build/$soc
+}$MAKEARGS = -C \$(UBOOT_SRCDIR) O=\$($BUILDDIR) $makeargs
 
+EOT
+
+	if [ -n "$TFA" ]; then
+	cat <<EOT
+$TFA: \$(ARM_TRUSTED_FIRMWARE_SRCDIR)/Makefile
+	\$(MAKE) -C \$(<D) ${cross_compile:+ CROSS_COMPILE=$cross_compile}${m0_cross_compile:+ M0_CROSS_COMPILE=$m0_cross_compile} PLAT=$soc
+
+EOT
+	fi
+
+cat <<EOT
 \$($BUILDDIR)/.config: \$(UBOOT_SRCDIR)/Makefile \$(GEN_BOARDS_MK_SH)
 	@mkdir -p \$(@D)
 	if [ -s \$@ ]; then \\
@@ -207,7 +233,7 @@ $MAKEARGS = -C \$(UBOOT_SRCDIR) O=\$($BUILDDIR) ARCH=$arch${cross_compile:+ CROS
 
 .PHONY: uboot-$id uboot-$id-savedefconfig uboot-$id-menuconfig
 
-uboot-$id: \$($BUILDDIR)/.config
+uboot-$id: \$($BUILDDIR)/.config${TFA:+ $TFA}
 	\$(MAKE) \$($MAKEARGS)
 
 uboot-$id-savedefconfig: \$($BUILDDIR)/.config

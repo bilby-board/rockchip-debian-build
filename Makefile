@@ -6,8 +6,9 @@ ROOTFS_DIR=$(B)/rootfs
 SCRIPTS_DIR=$(CURDIR)/scripts
 BOARDS_CONFIG_DIR=$(CURDIR)/conf
 
-LINUX_SRCDIR=$(S)/linux/linux-rockchip
-UBOOT_SRCDIR=$(S)/u-boot/u-boot-rockchip
+LINUX_SRCDIR = $(S)/linux/linux-rockchip
+UBOOT_SRCDIR = $(S)/u-boot/u-boot-rockchip
+ARM_TRUSTED_FIRMWARE_SRCDIR = $(S)/u-boot/arm-trusted-firmware
 
 MKIMAGE = mkimage
 UIMAGE_COMP = gzip
@@ -32,6 +33,7 @@ TOOLS=rkflashtool rkdeveloptool
 all: tools kernel uboot
 clean:
 	$(MAKE) -C $(RKFLASHTOOL_SRCDIR) clean
+	$(MAKE) -C $(ARM_TRUSTED_FIRMWARE_SRCDIR) realclean
 	rm -rf $(O) $(B)
 
 tools: $(patsubst %, $(O)/bin/%, $(TOOLS))
