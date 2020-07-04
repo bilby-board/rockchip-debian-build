@@ -212,7 +212,7 @@ EOT
 	if [ -n "$TFA" ]; then
 	cat <<EOT
 $TFA: \$(ARM_TRUSTED_FIRMWARE_SRCDIR)/Makefile
-	\$(MAKE) -C \$(<D) ${cross_compile:+ CROSS_COMPILE=$cross_compile}${m0_cross_compile:+ M0_CROSS_COMPILE=$m0_cross_compile} PLAT=$soc
+	\$(MAKE) -C \$(<D)${cross_compile:+ CROSS_COMPILE=$cross_compile}${m0_cross_compile:+ M0_CROSS_COMPILE=$m0_cross_compile} PLAT=$soc
 
 EOT
 	fi
