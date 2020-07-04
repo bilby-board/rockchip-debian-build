@@ -11,14 +11,20 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 	debootstrap debian-archive-keyring \
 	&& apt-get clean
 
-# cross compile linux
+# misc tools required for building
+RUN apt-get update && apt-get install --no-install-recommends -y \
+	bc \
+	device-tree-compiler \
+	python3-dev \
+	swig \
+	&& apt-get clean
+
+# cross compile linux and uboot
 RUN apt-get update && apt-get install --no-install-recommends -y \
 	gcc-aarch64-linux-gnu \
 	gcc-multilib-arm-linux-gnueabi \
 	gcc-multilib-arm-linux-gnueabihf \
-	bc \
 	bison \
-	device-tree-compiler \
 	flex \
 	libncurses-dev \
 	libssl-dev \
