@@ -23,7 +23,7 @@ IMAGE=$(sed -n -e 's|^FROM[ \t]\+\([^ \t]\+\).*|\1|p' "$F")
 
 # TODO: infer $PD from $IMAGE
 D="$WS/sources/docker/docker"
-PD="$D/ubuntu/18.04"
+PD="$D/ubuntu/20.04"
 
 if ! docker images | grep -q "$(echo "^$IMAGE:" | sed -e 's|:|[ \\t]\\+|g')"; then
 	"$D/build.sh" "$PD"
