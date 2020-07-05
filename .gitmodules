@@ -1,12 +1,12 @@
 [submodule "sources/tools/rkflashtool"]
 	path = sources/tools/rkflashtool
-	url = https://github.com/neo-technologies/rkflashtool
+	url = ../../neo-technologies/rkflashtool
 [submodule "sources/tools/rkdeveloptool"]
 	path = sources/tools/rkdeveloptool
-	url = https://github.com/rockchip-linux/rkdeveloptool
+	url = ../../rockchip-linux/rkdeveloptool
 [submodule "sources/docker"]
 	path = sources/docker
-	url = https://github.com/amery/docker-builder
+	url = ../../amery/docker-builder
 [submodule "sources/u-boot/arm-trusted-firmware"]
 	path = sources/u-boot/arm-trusted-firmware
 	url = ../../ARM-software/arm-trusted-firmware.git
